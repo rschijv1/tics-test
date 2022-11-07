@@ -63,7 +63,7 @@ export async function run() {
             annotations && annotations.map((annotationObj) => {
                 annotationsWithSummary = createAnnotationsSummary(annotationObj);
             });
-            createPRReview();
+            createPRReview(annotationsWithSummary);
 
             let results = {
                 explorerUrl: explorerUrl,
