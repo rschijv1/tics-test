@@ -10,6 +10,17 @@ export const generateStatusMarkdown = (passed, hasSuffix) => {
     }
 }
 
+export const generateStatusMarkdown2 = (status, hasSuffix) => {
+    switch(status) {
+       case "passed":
+           return ':heavy_check_mark: ' + (hasSuffix ? 'Passed ' : '');
+       case "failed":
+           return ':x: ' + (hasSuffix ? 'Failed ' : '');
+       case "skipped":
+           return ':warning: ' + (hasSuffix ? 'Skipped ' : '');
+    }
+}
+
 /**
 *  To properly render a table markdown, the table should start with a blank line.
 *  Hyphens(-) are used to create each column's header, while pipes(|) separate each column.

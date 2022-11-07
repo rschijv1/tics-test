@@ -1,13 +1,6 @@
-import { exec, execFile } from 'child_process';
-import util from 'node:util';
-import http from 'http';
-import https from 'https';
-import fs from 'fs';
-import path from 'path';
 import core from '@actions/core';
 import { ticsConfig } from '../github/configuration.js';
 import { doHttpRequest, getTiobewebBaseUrlFromGivenUrl } from './ApiHelper.js';
-const execWithPromise = util.promisify(exec);
 
 export class TicsPublisher {
 
@@ -62,6 +55,28 @@ export class TicsPublisher {
             core.setFailed("An error occurred when trying to retrieve quality gates " + error);
         }
     }
+
+    getAnnotations = async(annotationLink) => {
+        try {
+         
+            console.log("\u001b[35m > Trying to retrieve annotations from ", annotationLink);
+            let ticsAnnotations = await doHttpRequest(annotationLink).then((data) => {
+                let response = {
+                    statusCode: 200,
+                    body: JSON.stringify(data),
+                };
+                return response;
+            });
+
+            let ticsAnnotationsObj = JSON.parse(ticsAnnotations.body);
+
+            return ticsAnnotationsObj;
+
+        } catch (error) {
+            core.setFailed("An error occured when trying to retrieve annotations " + error);
+        }
+    }
+
 
     getSubstring = (value, del1, del2) => {
 

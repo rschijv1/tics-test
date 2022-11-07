@@ -1,7 +1,7 @@
 import core from '@actions/core';
 import http from 'http';
 import https from 'https';
-import { ticsConfig, githubConfig } from '../github/configuration.js';
+import { ticsConfig } from '../github/configuration.js';
 
 export const getTiobewebBaseUrlFromGivenUrl = (givenUrl) => {
     let urlLengthWithHost = 3;

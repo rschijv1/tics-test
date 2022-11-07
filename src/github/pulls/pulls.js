@@ -10,8 +10,7 @@ const payload = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'
 const pullRequestNum = payload.pull_request ? payload.pull_request.number : "";
 
 /* Helper functions to get all changed files params of a pull request */
-const getParams = () => {
-
+const getPRChangedFilesParams = () => {
     let parameters = {
         accept: 'application/vnd.github.v3+json',
         owner: githubConfig.owner,
@@ -25,34 +24,89 @@ const getParams = () => {
 }
 
 export const getPRChangedFiles =  async() => {
-
-    let changedFiles = "";
-
+    let changedFiles= [];
     try {
-       await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/files', getParams()).then((response) => {
-            core.debug(`Getting the changed files list ${response.data}`)
-
+       await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/files', getPRChangedFilesParams()).then((response) => {
+            core.info(`Getting the changed files list ${response.data}`);
             response.data && response.data.map((item) => {
-                changedFiles += item.filename + " ,"
+                changedFiles.push(item.filename);
             })
-
-            changedFiles = changedFiles.slice(0, -1); // remove the last comma
-
             return changedFiles; 
         })
     } catch(e) {
-        core.error(`We cannot retrieve the files that changed in this PR: ${e}`)
+        core.error(`We cannot retrieve the changed files of this PR: ${e}`)
     }
-
     return changedFiles;
 };
 
+const getPRReviewParams = (inputParams) => {
+    let params = {
+        owner: githubConfig.owner,
+        repo: githubConfig.reponame,
+        pull_number: pullRequestNum,
+        event: "COMMENT",
+        body: "Summary goes here",
+        comments: inputParams
+    }
+    return params;
+}
+
+export const createPRReview =  async(inputParams) => {
+    try {
+       await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews', getPRReviewParams(inputParams)).then((response) => {
+           core.info(`Created a PR review with the latest annotations found.`)
+           core.info(response.data);
+       });
+    } catch(e) {
+        core.error(`We cannot post the annotations of this PR: ${e}`)
+    }
+};
+
+export const updatePRReview =  async(inputParams) => {
+    let parameters = {
+        accept: 'application/vnd.github.v3+json',
+        owner: githubConfig.owner,
+        repo: githubConfig.reponame,
+        pull_number: pullRequestNum,
+        review_id: inputParams.reviewId
+    }
+    try {
+       await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews', getPRReviewParams(inputParams)).then((response) => {
+           core.info(`Created a PR review with the latest annotations found.`)
+           core.info(response.data);
+       });
+    } catch(e) {
+        core.error(`We cannot post the annotations of this PR: ${e}`)
+    }
+};
+
+export const getAllPRReviews = async() => {
+    let parameters = {
+        accept: 'application/vnd.github.v3+json',
+        owner: githubConfig.owner,
+        repo: githubConfig.reponame,
+        pull_number: pullRequestNum
+    }
+
+    let allReviews = [];
+
+     try {
+       allReviews = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews', parameters).then((response) => {
+           core.info(`Getting all the pr reviews so far.`)
+           return response.data;
+       });
+    } catch(e) {
+        core.error(`We cannot get the annotations of this PR: ${e}`)
+    }
+
+    return allReviews;
+}
+
 export function changeSetToFileList(changeSet) {
     core.info(`\u001b[35m > Creation of file list based on PR changeSet`);
-    let filesChanged = changeSet.split(",");
     let contents = "";
     
-    filesChanged && filesChanged.map((item) => {
+    changeSet && changeSet.map((item) => {
         contents += item + "\n";
     })
 

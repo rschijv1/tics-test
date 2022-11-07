@@ -1,18 +1,19 @@
-import core from '@actions/core';
 import { generateLinkMarkdown,
     generateStatusMarkdown,
     generateTableMarkdown,
+    generateStatusMarkdown2,
     generateExpandableAreaMarkdown } from './markdownGenerator.js';
 import { getTiobewebBaseUrlFromGivenUrl } from '../../tics/ApiHelper.js';
 import { ticsConfig } from '../configuration.js';
 
-export const getErrorSummary = (errorList) => {
-    let errorMessage = `## TICS Quality Gate\r\n\r\n### :x: Failed \r\n\r\n #### The following errors have occurred during analysis:\r\n\r\n`;
+export const getErrorOrWarningSummary = (errorOrWarningList, status) => {
 
-   if (errorList && Array.isArray(errorList)) {
-       errorList.forEach(item => errorMessage += `> :x: ${item}\r\n`); 
+    let errorMessage = `## TICS Quality Gate\r\n\r\n### ${generateStatusMarkdown2(status, true)} \r\n\r\n #### The following have occurred during analysis:\r\n\r\n`;
+
+   if (errorOrWarningList && Array.isArray(errorOrWarningList)) {
+       errorOrWarningList.forEach(item => errorMessage += `> ${generateStatusMarkdown2(status, false)} ${item}\r\n`); 
     } else {
-        errorMessage += `> :x: ${errorList}\r\n`
+        errorMessage += `> ${generateStatusMarkdown2(status, false)} ${errorOrWarningList}\r\n`
     }
 
     return errorMessage;
@@ -37,7 +38,12 @@ export const getLinkSummary = (link) => {
 }
 
 export const getFilesSummary = (fileList) => {
-    return `#### The following file(s) have been checked:\n> ${fileList}`;
+    let changedFiles = "";
+    fileList && fileList.map((item) => {
+        changedFiles += item + ", "
+    });
+
+    return `#### The following file(s) have been checked:\n> ${changedFiles.slice(0, -1)}`;
 }
 
 /**
