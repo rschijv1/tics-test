@@ -2,9 +2,14 @@ import { Octokit } from "@octokit/action"; //GitHub API client for GitHub Action
 import core from '@actions/core';
 import { githubConfig } from '../configuration.js';
 import fs from 'fs';
+import ProxyAgent from "proxy-agent";
 
 //Octokit client is authenticated
-const octokit = new Octokit();
+const octokit = new Octokit({
+  request: {
+    agent: new ProxyAgent(),
+  },
+});
 const payload = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
 const pullRequestNum = payload.pull_request ? payload.pull_request.number : "";
 
