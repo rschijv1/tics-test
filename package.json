@@ -19,9 +19,10 @@
   "homepage": "https://github.com/tiobe/tics-github-action#readme",
   "type": "module",
   "dependencies": {
-    "@octokit/action": "^4.0.4",
     "@actions/core": "^1.9.0",
     "@actions/github": "^5.0.3",
+    "@octokit/action": "^4.0.4",
+    "proxy-agent": "^5.0.0",
     "util": "^0.12.4"
   }
 }
